@@ -55,11 +55,6 @@ public class User extends BaseEntity {
 
     // 주소 정보 (임베디드 타입)
     @Embedded
-    @AttributeOverrides({
-            @AttributeOverride(name = "zipcode", column = @Column(name = "zipcode", nullable = false)),
-            @AttributeOverride(name = "address", column = @Column(name = "address", nullable = false)),
-            @AttributeOverride(name = "addressDetail", column = @Column(name = "address_detail", nullable = false))
-    })
     private Address address;
 
     // 주소 저장/수정 메서드 추가
