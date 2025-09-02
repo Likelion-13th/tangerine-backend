@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Embeddable
 @AllArgsConstructor
@@ -14,10 +15,10 @@ public class Address {
     private String zipcode;
 
     @Column(nullable = false)
-    private String address; //
+    private String address;
 
-    @Column(nullable = false)
-    private String addressDetail; //
+    @Column(name = "address_detail", nullable = false)
+    private String addressDetail;
 
     public Address() {
         this.zipcode = "10540";
