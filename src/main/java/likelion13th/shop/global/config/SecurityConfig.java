@@ -29,40 +29,40 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // 🔹 CSRF 비활성화
+                // CSRF 비활성화
                 .csrf(AbstractHttpConfigurer::disable)
 
-                // 🔹 CORS 설정 적용
+                // CORS 설정 적용
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-                // 🔹 인증 및 권한 설정
+                // 인증 및 권한 설정
+                /* 로그인 유무에 따라 다르게 보일 수 있도록 설정 */
+                /* 인가:누구인가.. */
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/health", // health check
 
-                                "/swagger-ui/**",         // 🔑 Swagger
+                                "/swagger-ui/**",         // Swagger
                                 "/v3/api-docs/**",
 
-                                "/users/reissue",         // 🔑 토큰 재발급
-                                "/users/logout",          // 🔑 로그아웃
+                                "/users/reissue",         // 토큰 재발급
+                                "/users/logout",          // 로그아웃
 
-                                "/token/**",              // 🔑 토큰 재발급 및 생성
-                                "/oauth2/**",             // 🟡 카카오 OAuth 리디렉션
-                                "/login/oauth2/**",        // 🟡 카카오 OAuth 콜백
+                                "/token/**",              // 토큰 재발급 및 생성
+                                "/oauth2/**",             // 카카오 OAuth 리디렉션
+                                "/login/oauth2/**",        // 카카오 OAuth 콜백
 
-                                "/categories/**",         // ✅ 로그인 없이 카테고리 조회 가능
-                                "/items/**"               // ✅ 로그인 없이 상품 조회 가능
+                                "/categories/**",         //  로그인 없이 카테고리 조회 가능
+                                "/items/**"               //  로그인 없이 상품 조회 가능
                         ).permitAll()
-                        // SecurityConfig.java에 추가
-                        .requestMatchers("/admin/**").hasRole("ADMIN")  // 관리자만 접근 가능
-                        .requestMatchers("/seller/**").hasAnyRole("ADMIN", "SELLER")  // 관리자, 판매자 접근 가능
                         .anyRequest().authenticated()
                 )
-                // 🔹 세션 정책: STATELESS (JWT 기반)
+                // 세션 정책: STATELESS (JWT 기반)
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                /* STATELESS: 세션 상태를 기억하지 않아도 된다는 의미~ */
 
-                // 🔹 OAuth2 로그인 설정 (UserService 연동)
+                // OAuth2 로그인 설정 (UserService 연동)
                 .oauth2Login(oauth2 -> oauth2
                         //.loginPage("/users/login")
                         .successHandler(oAuth2SuccessHandler)
@@ -70,7 +70,9 @@ public class SecurityConfig {
                                 .userService(oAuth2UserService))
                 )
 
-                // 🔹 필터 체인 적용
+                // 필터 체인 적용
+                /* jwt 유효한지.. 보안..
+                   순서 중요!! 막 하면 큰일남 */
                 .addFilterBefore(authCreationFilter, AnonymousAuthenticationFilter.class)
                 .addFilterBefore(jwtValidationFilter, AuthCreationFilter.class);
 
@@ -84,8 +86,8 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:3000",
-                "http://sajang-dev.ap-northeast-2.elasticbeanstalk.com",
-                "https://likelionshop.netlify.app"
+                // "아기 사자 백엔드 배포 주소",
+                "https://tangerine-likelion.netlify.app/"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));

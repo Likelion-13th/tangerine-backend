@@ -34,6 +34,25 @@ dependencies {
 	// Testing
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	//  Spring Boot Validation
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	// → DTO 검증(@NotNull, @Email 등)에 필요합니다.
+
+	//  Spring Security
+	implementation 'org.springframework.security:spring-security-config'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	// → 보안 설정 및 필터 체인(SecurityConfig) 작동을 위해 필수입니다.
+
+	//  OAuth2 Client
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+	// → 카카오 같은 외부 OAuth2 제공자와 연동하기 위해 필요합니다.
+
+	//  JWT (io.jsonwebtoken: JJWT 라이브러리)
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+	// → Access Token / Refresh Token 생성 및 검증을 위한 라이브러리입니다.
 }
 
 tasks.named('test') {
