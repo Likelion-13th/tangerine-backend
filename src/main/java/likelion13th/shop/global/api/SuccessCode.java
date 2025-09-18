@@ -23,8 +23,7 @@ public enum SuccessCode implements BaseCode { // 성공
     USER_INFO_GET_SUCCESS(HttpStatus.OK, "USER_203", "사용자 정보 조회에 성공했습니다."),
     USER_MILEAGE_GET_SUCCESS(HttpStatus.OK, "USER_204", "사용자 마일리지 조회에 성공했습니다."),
     USER_ORDERS_STATUS_SUCCESS(HttpStatus.OK, "USER_205", "주문 목록 조회에 성공했습니다."),
-    USER_PASSWORD_CHANGE_SUCCESS(HttpStatus.OK, "USER_208", "비밀번호가 성공적으로 변경되었습니다."),
-    USER_PROFILE_IMAGE_UPLOAD_SUCCESS(HttpStatus.OK, "USER_209", "프로필 이미지가 업로드되었습니다."),
+
     // Category
     CATEGORY_ITEMS_GET_SUCCESS(HttpStatus.OK, "CATEGORY_2001", "카테고리 상품 조회 성공"),
     CATEGORY_ITEMS_EMPTY(HttpStatus.OK, "CATEGORY_204", "해당 카테고리에 등록된 상품이 없습니다."),
@@ -36,7 +35,8 @@ public enum SuccessCode implements BaseCode { // 성공
     ORDER_CREATE_SUCCESS(HttpStatus.CREATED, "ORDER_201", "주문이 성공적으로 생성되었습니다."),
     ORDER_GET_SUCCESS(HttpStatus.OK, "ORDER_2001", "주문 조회에 성공했습니다."),
     ORDER_LIST_SUCCESS(HttpStatus.OK, "ORDER_2002", "모든 주문 목록 조회에 성공했습니다."),
-    ORDER_CANCEL_SUCCESS(HttpStatus.OK, "ORDER_2003", "주문이 성공적으로 취소되었습니다."),
+    ORDER_LIST_EMPTY(HttpStatus.OK, "ORDER_2003", "등록된 주문이 없습니다."),
+    ORDER_CANCEL_SUCCESS(HttpStatus.OK, "ORDER_2004", "주문이 성공적으로 취소되었습니다."),
 
     // S3
     S3_UPLOAD_SUCCESS(HttpStatus.OK, "S3_200", "S3 업로드가 성공적으로 완료되었습니다."),

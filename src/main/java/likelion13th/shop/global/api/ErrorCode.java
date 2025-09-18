@@ -22,8 +22,7 @@ public enum ErrorCode implements BaseCode { // 실패
     USER_ORDERS_EMPTY(HttpStatus.NOT_FOUND, "USER_4043", "사용자의 주문 내역이 없습니다."),
     USER_ORDER_STATUS_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_4044", "해당 주문이 없습니다."),
 
-    USER_PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "USER_4005", "현재 비밀번호가 일치하지 않습니다."),
-    USER_PROFILE_IMAGE_TOO_LARGE(HttpStatus.BAD_REQUEST, "USER_4006", "프로필 이미지 크기가 너무 큽니다."),
+    INVALID_MILEAGE(HttpStatus.BAD_REQUEST, "USER_4045", "보유한 마일리지를 초과하여 사용 및 회수 할 수 없습니다."),
 
     // Jwt
     WRONG_REFRESH_TOKEN(HttpStatus.NOT_FOUND, "JWT_4041", "일치하는 리프레시 토큰이 없습니다."),
