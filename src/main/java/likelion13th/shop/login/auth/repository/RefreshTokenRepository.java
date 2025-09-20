@@ -29,6 +29,7 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
     @Query("DELETE FROM RefreshToken rt WHERE rt.user = :user")
     void deleteByUser(@Param("user") User user);
 }
+
 /*
 1) 왜 필요한가
     - 사용자별 토큰을 관리하려면 필요함

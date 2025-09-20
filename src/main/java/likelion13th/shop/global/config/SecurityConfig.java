@@ -36,8 +36,6 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
                 // 인증 및 권한 설정
-                /* 로그인 유무에 따라 다르게 보일 수 있도록 설정 */
-                /* 인가:누구인가.. */
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/health", // health check
@@ -60,7 +58,6 @@ public class SecurityConfig {
                 // 세션 정책: STATELESS (JWT 기반)
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                /* STATELESS: 세션 상태를 기억하지 않아도 된다는 의미~ */
 
                 // OAuth2 로그인 설정 (UserService 연동)
                 .oauth2Login(oauth2 -> oauth2
@@ -71,8 +68,6 @@ public class SecurityConfig {
                 )
 
                 // 필터 체인 적용
-                /* jwt 유효한지.. 보안..
-                   순서 중요!! 막 하면 큰일남 */
                 .addFilterBefore(authCreationFilter, AnonymousAuthenticationFilter.class)
                 .addFilterBefore(jwtValidationFilter, AuthCreationFilter.class);
 

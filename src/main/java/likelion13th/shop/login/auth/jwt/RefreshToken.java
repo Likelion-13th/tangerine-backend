@@ -60,6 +60,7 @@ public class RefreshToken {
     // (선택) 가독성 향상을 위한 헬퍼 메서드 예시
     // public boolean isExpired() { return ttl != null && System.currentTimeMillis() >= ttl; }
 }
+
 /*
 1) 왜 필요한가
     - 사용자별 refresh token을 안전하게 보관하기 위해 필요함

@@ -13,61 +13,92 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.Collections;
 
+/**
+ * Spring Security에서 인증 주체(principal)로 사용하는 사용자 정보 객체
+ * - 우리 서비스는 "providerId(카카오 고유 ID)"를 username으로 사용
+ * - 비밀번호 기반 로그인이 아니므로 password는 사용하지 않음
+ */
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 public class CustomUserDetails implements UserDetails {
-    private Long userId;
-    private String providerId;
-    private String usernickname;
-    private Address address;
 
+    // ───────────────────────────────── 기본 식별 정보 ─────────────────────────────────
+    private Long userId;         // 내부 DB의 User PK
+    private String providerId;   // 소셜 로그인 고유 식별자 (username으로 사용)
+    private String usernickname; // 카카오 프로필 닉네임(표시용)
+    private Address address;     // 예시: 프로필의 주소 정보
+
+    // ──────────────────────────────── 권한(Authorization) ───────────────────────────────
+    // - null일 수 있으므로 getAuthorities()에서 기본 ROLE_USER를 fallback으로 제공
     private Collection<? extends GrantedAuthority> authorities;
 
+    // ──────────────────────────────── 생성자/팩토리 메서드 ───────────────────────────────
+
+    // User 엔티티를 받아 기본 권한(ROLE_USER)을 가진 CustomUserDetails로 변환
     public CustomUserDetails(User user) {
-        this.userId = user.getId();
-        this.providerId = user.getProviderId();
+        this.userId       = user.getId();
+        this.providerId   = user.getProviderId();
         this.usernickname = user.getUsernickname();
-        this.authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
+        this.address      = user.getAddress();
+        this.authorities  = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
     }
 
+    // (선택) username, password, 권한을 직접 받는 생성자
+    // - 현재는 소셜 로그인이라 password를 사용하지 않으며, null/빈 문자열로 둠
     public CustomUserDetails(String providerId, String password, Collection<? extends GrantedAuthority> authorities) {
-        this.providerId = providerId;
-        this.userId = null;
+        this.providerId   = providerId;
+        this.userId       = null;
         this.usernickname = null;
-        this.authorities = authorities;
-        this.address = null;
+        this.authorities  = authorities;
+        this.address      = null;
+        // password는 무시됨 (소셜 로그인 시 사용하지 않음)
     }
 
-    // User 엔티티 -> CustomUserDetails 변환
+    /**
+     * User 엔티티 → CustomUserDetails 변환
+     * - 권한(authorities)은 지정하지 않음 → getAuthorities()에서 ROLE_USER로 보완
+     */
     public static CustomUserDetails fromEntity(User entity) {
         return CustomUserDetails.builder()
-                .userId(entity.getId())
-                .providerId(entity.getProviderId())
-                .usernickname(entity.getUsernickname())
-                .address(entity.getAddress())
+                .userId(entity.getId())                 // DB PK
+                .providerId(entity.getProviderId())     // 소셜 고유 ID (username)
+                .usernickname(entity.getUsernickname()) // 닉네임
+                .address(entity.getAddress())           // 주소
                 .build();
     }
 
-    // User 엔티티 <- CustomUserDetails 변환
+    /**
+     * CustomUserDetails → User 엔티티 변환
+     * - 신규 저장 시 최소 필드만 세팅 (비밀번호 없음)
+     * - 필요 시 등급/상태/타 필드를 서비스 레이어에서 채워 넣음
+     */
     public User toEntity() {
         return User.builder()
-                .id(this.userId)
-                .providerId(this.providerId)
-                .usernickname(this.usernickname)
-                .address(this.address)
+                .id(this.userId)                         // PK (신규 생성이면 null 허용)
+                .providerId(this.providerId)             // 소셜 고유 ID
+                .usernickname(this.usernickname)         // 닉네임
+                .address(this.address)                   // 주소
                 .build();
     }
 
+    // ──────────────────────────────── UserDetails 필수 구현 ───────────────────────────────
+
     @Override
-    public String getUsername(){
+    public String getUsername() {
+        // username으로 providerId를 사용 (주요 인증 키)
         return this.providerId;
     }
 
+    /**
+     * 권한 조회
+     * - 명시된 권한이 있으면 그대로 사용
+     * - 없으면 기본 ROLE_USER 권한을 부여
+     */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        if(this.authorities != null && this.authorities.isEmpty()){
+        if (this.authorities != null && !this.authorities.isEmpty()) {
             return this.authorities;
         }
         return Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
