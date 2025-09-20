@@ -61,8 +61,8 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
                 "https://tangerine-likelion.netlify.app/",
                 "http://localhost:3000"
         );
-        if(frontendRedirectUri != null || authorizeUris.contains(frontendRedirectUri)) {
-            frontendRedirectUri = "https://tanger-likelion.netlify.app/";
+        if(frontendRedirectUri == null || authorizeUris.contains(frontendRedirectUri)) {
+            frontendRedirectUri = "https://tangerine-likelion.netlify.app/";
         }
 
         String redirectUrl = UriComponentsBuilder
