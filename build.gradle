@@ -25,7 +25,7 @@ dependencies {
 	runtimeOnly  'com.mysql:mysql-connector-j:8.3.0'
 
 	// Swagger
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
 
 	// Lombok
 	compileOnly   'org.projectlombok:lombok'
@@ -53,8 +53,19 @@ dependencies {
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 	// → Access Token / Refresh Token 생성 및 검증을 위한 라이브러리입니다.
+
+	// AWS와 통합된 다양한 서비스를 사용할 수 있도록 함
+	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 }
 
+/*
 tasks.named('test') {
 	useJUnitPlatform()
+}
+*/
+
+// 일반 jar 생성을 비활성화
+// 어떤 jar를 선택할 지 모르기 때문에.. 하나 꺼버림!
+tasks.named('jar'){
+	enabled = false
 }
