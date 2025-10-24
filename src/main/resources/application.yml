@@ -82,7 +82,7 @@ cloud:
 server:
   tomcat:
     max-swallow-size: -1  # -1은 무제한, 업로드 중 에러나거나 제한에 걸리면, 정상 상태로 복구함
-    max-http-from-post-size: -1 #
+    max-http-form-post-size: -1 #
 
 #Swagger
 springdoc:
