@@ -17,7 +17,7 @@ jobs:
 
       - name: Create .env file from secret
         run: |
-          printf '%s' "${{ secrets.ENV_FILE }}" > .env
+          printf '%s' "${{ secrets.ENV }}" > .env
           chmod 600 .env
 
       - name: Set up JDK 17
@@ -59,8 +59,8 @@ jobs:
         with:
           aws_access_key: ${{ secrets.AWS_ACTION_ACCESS_KEY_ID }}
           aws_secret_key: ${{ secrets.AWS_ACTION_SECRET_ACCESS_KEY }}
-          application_name: tangerine-dev
-          environment_name: Tangerine-dev-env
+          application_name: 'tangerine-dev'
+          environment_name: 'Tangerine-dev-env'
           version_label: github-action-${{ steps.current-time.outputs.formattedTime }}
           region: 'ap-northeast-2'
           deployment_package: 'deploy/deploy.zip'

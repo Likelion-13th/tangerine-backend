@@ -4,7 +4,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Embeddable
 @AllArgsConstructor
@@ -20,6 +19,7 @@ public class Address {
     @Column(name = "address_detail", nullable = false)
     private String addressDetail;
 
+// 주소 관련
     public Address() {
         this.zipcode = "10540";
         this.address = "경기도 고양시 덕양구 항공대학로 76";
