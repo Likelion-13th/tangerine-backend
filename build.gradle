@@ -48,6 +48,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 	// → 카카오 같은 외부 OAuth2 제공자와 연동하기 위해 필요합니다.
 
+	//	env 관리
+	implementation 'io.github.cdimascio:dotenv-java:3.0.0'
+
 	//  JWT (io.jsonwebtoken: JJWT 라이브러리)
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
