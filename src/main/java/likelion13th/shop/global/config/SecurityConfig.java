@@ -84,6 +84,7 @@ public class SecurityConfig {
                 // "아기 사자 백엔드 배포 주소",
                 "https://tangerine-likelion.netlify.app/"
         ));
+
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);

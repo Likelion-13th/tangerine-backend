@@ -15,9 +15,7 @@
 #    path: /v3/api-docs
 #  cors:
 #    enabled: true
-
 ---
-
 spring:
   #datasource:
   #  url: jdbc:mysql://localhost:3306/sajang_db
@@ -96,6 +94,7 @@ springdoc:
     operations-sorter: method # 메서드 이름 기준으로 API 정렬
 
 ---
+
 # local profile
 spring:
   config:
