@@ -53,7 +53,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
                 frontendRedirectOrigin = DEFAULT_FRONT_ORIGIN;
             }
 
-            // // 5) 최종 리다이렉트 URL 생성(토큰은 URL 인코딩 권장)
+            // 5) 최종 리다이렉트 URL 생성(토큰은 URL 인코딩 권장)
             String redirectUrl = UriComponentsBuilder
                     .fromUriString(frontendRedirectOrigin)
                     .queryParam("accessToken", URLEncoder.encode(jwt.getAccessToken(), StandardCharsets.UTF_8))
