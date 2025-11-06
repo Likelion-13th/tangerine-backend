@@ -2,111 +2,89 @@ package likelion13th.shop.login.auth.utils;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import likelion13th.shop.domain.Address;
-import likelion13th.shop.domain.User;
+import likelion13th.shop.global.api.ErrorCode;
+import likelion13th.shop.global.exception.GeneralException;
 import likelion13th.shop.login.auth.dto.JwtDto;
-import likelion13th.shop.login.auth.jwt.CustomUserDetails;
-import likelion13th.shop.login.auth.service.JpaUserDetailsManager;
 import likelion13th.shop.login.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 
-/**
- * OAuth2 로그인 성공 시 후처리를 담당하는 핸들러
- * - 인증 성공 후: 신규 회원 생성(필요 시) → JWT 발급 → 안전한 프론트로 리다이렉트
- * - providerId(카카오 고유 ID)를 "사용자명"으로 사용
- */
 @Slf4j
-@RequiredArgsConstructor
 @Component
+@RequiredArgsConstructor
 public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
-    private final JpaUserDetailsManager jpaUserDetailsManager; // Security 사용자 저장/조회 담당
-    private final UserService userService;                     // JWT 발급 및 RefreshToken 저장 로직
+    private final UserService userService;
+
+    private static final List<String> ALLOWED_ORIGINS = List.of(
+            "https://jimalshop.netlify.app",
+            "http://localhost:3000"
+    );
+    private static final String DEFAULT_FRONT_ORIGIN = "https://jimalshop.netlify.app";
 
     @Override
-    public void onAuthenticationSuccess(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            Authentication authentication
-    ) throws IOException {
-        // 1) 인증 결과에서 OAuth2User 추출
-        //    - SecurityConfig에서 OAuth2 인증이 성공하면 Authentication의 principal이 OAuth2User가 됨
-        DefaultOAuth2User oAuth2User = (DefaultOAuth2User) authentication.getPrincipal();
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
+        try {
+            // // 1) providerId 추출(프로젝트 매핑에 맞춰 조정 가능)
+            String providerId = extractProviderId(authentication);
+            log.info("// [OAuth2Success] providerId={}", providerId);
 
-        // 2) 카카오에서 확장해 둔 attributes에서 provider_id, nickname 가져오기
-        String providerId = (String) oAuth2User.getAttribute("provider_id");
-        String nickname   = (String) oAuth2User.getAttribute("nickname");
+            // // 2) JWT 발급(Access/Refresh 생성 및 Refresh 저장)
+            JwtDto jwt = userService.jwtMakeSave(providerId);
+            log.info("// [OAuth2Success] JWT 발급 완료");
 
-        // 3) 민감정보 로그 마스킹 (운영 로그에 식별자 전체 노출 금지)
-        String maskedPid  = (providerId != null && providerId.length() > 4) ? providerId.substring(0, 4) + "***" : "***";
-        String maskedNick = (nickname != null && !nickname.isBlank()) ? "*(hidden)*" : "(none)";
-        log.info("OAuth2 Success - providerId(masked)={}, nickname={}", maskedPid, maskedNick);
+            // // 3) 세션에서 프론트 Origin 회수(+사용 후 제거)
+            String frontendRedirectOrigin = (String) request.getSession().getAttribute("FRONT_REDIRECT_URI");
+            request.getSession().removeAttribute("FRONT_REDIRECT_URI");
 
-        // 4) 신규 회원 여부 확인 후, 없으면 생성
-        //    - JpaUserDetailsManager.userExists(providerId)는 "사용자명" 기준으로 확인함
-        //    - 우리 서비스는 providerId를 사용자명(username)으로 사용
-        if (!jpaUserDetailsManager.userExists(providerId)) {
-            // 4-1) 최소 필수값으로 User 엔티티 생성
-            User newUser = User.builder()
-                    .providerId(providerId)      // 고유 식별자
-                    .usernickname(nickname)      // 프로필 닉네임
-                    .deletable(true)             // 정책상 기본 true
-                    .build();
+            // // 4) 최종 안전장치(화이트리스트 재검증)
+            if (frontendRedirectOrigin == null || !ALLOWED_ORIGINS.contains(frontendRedirectOrigin)) {
+                frontendRedirectOrigin = DEFAULT_FRONT_ORIGIN;
+            }
 
-            // 4-2) 예시 주소 세팅 (실서비스에서는 실제 입력 화면/동의 절차에서 받도록 해야 함)
-            //      주의: 개인정보를 로그로 출력하거나 쿼리스트링으로 노출하지 않도록 관리
-            newUser.setAddress(new Address("10540", "경기도 고양시 덕양구 항공대학로 76", "한국항공대학교"));
+            // // 5) 최종 리다이렉트 URL 생성(토큰은 URL 인코딩 권장)
+            String redirectUrl = UriComponentsBuilder
+                    .fromUriString(frontendRedirectOrigin)
+                    .queryParam("accessToken", URLEncoder.encode(jwt.getAccessToken(), StandardCharsets.UTF_8))
+                    .build(true)
+                    .toUriString();
 
-            // 4-3) Security 저장용 UserDetails로 래핑하여 등록
-            //      - 내부적으로 비밀번호가 필요 없는 소셜 사용자라면, 별도 정책으로 처리
-            CustomUserDetails userDetails = new CustomUserDetails(newUser);
-            jpaUserDetailsManager.createUser(userDetails);
-            log.info("신규 회원 등록 완료 - providerId(masked)={}", maskedPid);
-        } else {
-            log.info("기존 회원 로그인 - providerId(masked)={}", maskedPid);
+            log.info("// [OAuth2Success] redirect → {}", redirectUrl);
+            response.sendRedirect(redirectUrl);
+
+        } catch (GeneralException e) {
+            log.error("// [OAuth2Success] 도메인 예외: {}", e.getReason().getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("// [OAuth2Success] 예상치 못한 에러: {}", e.getMessage());
+            throw new GeneralException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
+    }
 
-        // 5) JWT 발급 및 Refresh 저장
-        //    - userService.jwtMakeSave(providerId): Access/Refresh 발급 + Refresh 저장을 한 번에 처리
-        JwtDto jwt = userService.jwtMakeSave(providerId);
-        log.info("JWT 발급 완료 - providerId(masked)={}", maskedPid);
-
-        // 6) 프론트엔드 redirect_uri 화이트리스트 검증
-        //    - Open Redirect 방지: 요청 파라미터의 redirect_uri가 허용된 호스트인지 검사
-        String frontendRedirectUri = request.getParameter("redirect_uri");
-        List<String> authorizedUris = List.of(
-                "https://tangerine-likelion.netlify.app/",
-                "http://localhost:3000"
-        );
-        if (frontendRedirectUri == null || !authorizedUris.contains(frontendRedirectUri)) {
-            // 유효하지 않으면 기본 안전 도메인으로 강제
-            frontendRedirectUri = "https://tangerine-likelion.netlify.app/";
+    private String extractProviderId(Authentication authentication) {
+        if (authentication instanceof OAuth2AuthenticationToken oAuth2) {
+            if (oAuth2.getPrincipal() instanceof DefaultOAuth2User user) {
+                Map<String, Object> attrs = user.getAttributes();
+                Object v = attrs.getOrDefault("providerId", attrs.get("id")); // // Kakao 기본: "id"
+                if (v == null) throw new GeneralException(ErrorCode.UNAUTHORIZED);
+                return String.valueOf(v);
+            }
         }
-
-        // 7) 프론트로 리다이렉트할 URL 구성
-        //    - 현재 코드는 accessToken을 쿼리 파라미터로 전달
-        //    - 보안 권장: 가능하면 HttpOnly Secure 쿠키(서버 설정)로 전달하는 방식을 고려
-        String redirectUrl = UriComponentsBuilder
-                .fromUriString(frontendRedirectUri)
-                .queryParam("accessToken", jwt.getAccessToken())
-                .build()
-                .toUriString();
-
-        log.info("Redirecting to authorized frontend host: {}", frontendRedirectUri);
-
-        // 8) 리다이렉트
-        response.sendRedirect(redirectUrl);
+        throw new GeneralException(ErrorCode.UNAUTHORIZED);
     }
 }
+
 
 /*
 1) 왜 필요한가
