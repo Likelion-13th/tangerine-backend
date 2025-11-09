@@ -31,10 +31,10 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
     private final UserService userService;                     // JWT 발급 및 RefreshToken 저장 로직
 
     private static final List<String> ALLOWED_ORIGINS = List.of(
-            "https://jimalshop.netlify.app",
+            "https://tangerine-likelion.netlify.app/",
             "http://localhost:3000"
     );
-    private static final String DEFAULT_FRONT_ORIGIN = "https://jimalshop.netlify.app";
+    private static final String DEFAULT_FRONT_ORIGIN = "https://tangerine-likelion.netlify.app/";
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {

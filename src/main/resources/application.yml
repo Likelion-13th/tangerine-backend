@@ -1,44 +1,8 @@
-# default profile settings
-#spring:
-#  config:
-#    import: optional:file:.env[.properties]
-#  profiles:
-#    active: local
-
-## Swagger
-#springdoc:
-#  swagger-ui:
-#    path: /swagger
-#    display-request-duration: true
-#  api-docs:
-#    enabled: true
-#    path: /v3/api-docs
-#  cors:
-#    enabled: true
----
-
 spring:
-  #datasource:
-  #  url: jdbc:mysql://localhost:3306/sajang_db
-  #  username: sajang_user
-  #  password: sajang_password
-  #  driver-class-name: com.mysql.cj.jdbc.Driver
-
-
-  #jpa:
-  #  hibernate:
-  #    ddl-auto: update
-  #  show-sql: true
-  #  properties:
-  #    hibernate:
-  #      format_sql: true
-
-  # default profile settings
   config:
     import: optional:file:.env[.properties]
   profiles:
     active: local
-
   security:
     oauth2:
       client:
