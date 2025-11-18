@@ -15,25 +15,25 @@ import java.time.LocalDateTime;
 public class OrderResponse {
     private Long orderId;
     private String usernickname;
-    private String itemName;
     private int quantity;
     private int totalPrice;
     private int finalPrice;
     private int mileageToUse;
     private OrderStatus status;
     private LocalDateTime createdAt;
+    private ItemResponse item;
 
     public static OrderResponse from(Order order) {
         return new OrderResponse(
                 order.getId(),
                 order.getUser().getUsernickname(),
-                order.getItem().getItemName(),
                 order.getQuantity(),
                 order.getTotalPrice(),
                 order.getFinalPrice(),
                 order.getTotalPrice() - order.getFinalPrice(),
                 order.getStatus(),
-                order.getCreatedAt()
+                order.getCreatedAt(),
+                ItemResponse.from(order.getItem())
         );
     }
 }

@@ -6,6 +6,7 @@ import likelion13th.shop.domain.Item;
 import likelion13th.shop.global.api.ErrorCode;
 import likelion13th.shop.global.exception.GeneralException;
 import likelion13th.shop.repository.CategoryRepository;
+import likelion13th.shop.repository.ItemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CategoryService {
     private final CategoryRepository categoryRepository;
+    private final ItemRepository itemRepository;
 
     /** 카테고리 존재 여부 확인 **/
     // 이런 식으로 검증하는 메서드를 따로 만들어서 재사용성 높일 수 있음
@@ -27,6 +29,11 @@ public class CategoryService {
     /** 카테고리 별 상품 목록 조회 **/
     // DTO에 담아서 반환
     public List<ItemResponse> getItemsByCategory(Long categoryId) {
+        if(categoryId==3){
+            return itemRepository.findAllByIsNew(true).stream()
+                    .map(ItemResponse::from)
+                    .collect(Collectors.toList());
+        }
         // 카테고리 유효성 검사
         Category category = findCategoryById(categoryId);
 
