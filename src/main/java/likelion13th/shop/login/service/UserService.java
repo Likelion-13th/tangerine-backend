@@ -82,7 +82,7 @@ public class UserService {
                             .user(user)                                   // User와 1:1
                             .refreshToken(refreshToken)                   // 실제 RT 문자열
                             .ttl(System.currentTimeMillis()
-                                    + 1000L * 60 * 60 * 24 * 7)          // 만료 시각(예: 7일)
+                                    + 1000L * 60 * 60 * 24)          // 만료 시각(예: 1일)
                             .build();
                 });
 
